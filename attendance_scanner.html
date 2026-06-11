@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>PBC 2026 — Attendance</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface2: #1e1e1e;
+      --border: #2a2a2a;
+      --text: #f0f0f0;
+      --muted: #888;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --blue: #3b82f6;
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 72px;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .tabs {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 200;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 4px 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: none;
+      letter-spacing: .3px;
+    }
+
+    .tab.active {
+      color: var(--text);
+    }
+
+    .tab-icon {
+      font-size: 18px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .panel {
+      display: none;
+      padding: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #555;
+    }
+
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .row2>div input,
+    .row2>div select {
+      margin-bottom: 0;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .btn:active {
+      opacity: .8;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #000;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: #2a1010;
+      color: var(--red);
+      border: 1px solid #5a2020;
+    }
+
+    .btn-sm {
+      display: inline-block;
+      width: auto;
+      padding: 8px 14px;
+      font-size: 12px;
+      margin: 0 4px 4px 0;
+    }
+
+    /* ── Scan panel ── */
+    .session-banner {
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-left: 3px solid var(--green);
+    }
+
+    .session-banner.inactive {
+      border-left-color: var(--muted);
+    }
+
+    .session-banner h3 {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .session-banner p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .camera-wrap {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #111;
+      aspect-ratio: 1;
+      margin-bottom: 12px;
+    }
+
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .scan-frame {
+      width: 70%;
+      aspect-ratio: 1;
+      border: 2px solid rgba(255, 255, 255, .6);
+      border-radius: 8px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, .35);
+    }
+
+    .camera-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .flash {
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      transition: background .15s;
+    }
+
+    .flash-idle {
+      background: var(--surface2);
+      color: var(--muted);
+    }
+
+    .flash-ok {
+      background: #14532d;
+      color: var(--green);
+    }
+
+    .flash-dup {
+      background: #713f12;
+      color: var(--yellow);
+    }
+
+    .flash-error {
+      background: #7f1d1d;
+      color: var(--red);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .stat-lbl {
+      font-size: 9px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .c-green {
+      color: var(--green);
+    }
+
+    .c-red {
+      color: var(--red);
+    }
+
+    .c-yellow {
+      color: var(--yellow);
+    }
+
+    .scan-list {
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .scan-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 6px;
+      animation: slideIn .15s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-8px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .scan-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .scan-dot.present {
+      background: var(--green);
+    }
+
+    .scan-dot.absent {
+      background: var(--red);
+    }
+
+    .scan-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .scan-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scan-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .session-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .session-item:active {
+      opacity: .8;
+    }
+
+    .session-item.active-session {
+      border-color: var(--green);
+    }
+
+    .session-item h4 {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .session-item p {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .session-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--surface2);
+      margin-right: 6px;
+    }
+
+    .master-table-wrap {
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--surface2);
+      color: var(--muted);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    td.name-col {
+      text-align: left;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cell-p {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .cell-a {
+      color: var(--red);
+    }
+
+    .cell-dash {
+      color: var(--muted);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 32px 16px;
+    }
+
+    .warn-banner {
+      background: #3b2f00;
+      border: 1px solid #854d0e;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin: 12px 16px 0;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #fde68a;
+    }
+
+    .warn-banner strong {
+      color: #fff;
+    }
+
+    .camera-live {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(34, 197, 94, .85);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: none;
+      z-index: 10;
+    }
+
+    .photo-scan-hint {
+      display: none;
+      text-align: center;
+      padding: 28px 20px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .photo-scan-hint .big-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .photo-mode .camera-wrap {
+      aspect-ratio: auto;
+      min-height: 140px;
+      background: var(--surface2);
+    }
+
+    .photo-mode .camera-placeholder {
+      display: none !important;
+    }
+
+    .photo-mode .photo-scan-hint {
+      display: block;
+    }
+
+    .photo-mode #video,
+    .photo-mode .camera-overlay,
+    .photo-mode #cameraLive {
+      display: none !important;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ── Two-button scan row ── */
+    .scan-btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .scan-btn-row .btn { margin-bottom: 0; }
+    .btn-live {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff;
+    }
+    .btn-live.active {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+    }
+    .btn-photo {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #fff;
+    }
+
+    /* ── Toast popup ── */
+    #toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120px);
+      z-index: 9999;
+      background: #14532d;
+      border: 1.5px solid #22c55e;
+      border-radius: 16px;
+      padding: 16px 22px;
+      min-width: 260px;
+      max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    #toast.toast-dup {
+      background: #713f12;
+      border-color: #eab308;
+    }
+    #toast.toast-error {
+      background: #7f1d1d;
+      border-color: #ef4444;
+    }
+    .toast-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .toast-body {}
+    .toast-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .toast-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,.7);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="header-title">PBC 2026 · Attendance</div>
+    <div class="header-sub">Policy BootCamp · 15 days · 4 sessions/day · 125 delegates</div>
+  </header>
+
+  <div class="warn-banner hidden" id="mobileWarn"></div>
+
+  <!-- ═══ SETUP PANEL ═══ -->
+  <div class="panel" id="panelSetup">
+    <div class="card">
+      <div class="card-title">New Session</div>
+      <div class="row2">
+        <div>
+          <label>Day</label>
+          <select id="setupDay"></select>
+        </div>
+        <div>
+          <label>Session #</label>
+          <select id="setupSessionNum">
+            <option value="1">Session 1</option>
+            <option value="2">Session 2</option>
+            <option value="3">Session 3</option>
+            <option value="4">Session 4</option>
+          </select>
+        </div>
+      </div>
+      <label>Session Title</label>
+      <input id="setupTitle" type="text" placeholder="e.g. Opening Keynote, Panel Discussion">
+      <label>Speaker / Facilitator</label>
+      <input id="setupSpeaker" type="text" placeholder="e.g. Dr. Rajesh Kumar">
+      <label>Cutoff Time (scan before = Present, after = Absent)</label>
+      <input id="setupCutoff" type="time" value="09:30">
+      <button class="btn btn-primary" onclick="createSession()">Create &amp; Start Scanning</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Resume</div>
+      <div id="recentSessions"></div>
+    </div>
+  </div>
+
+  <!-- ═══ SCAN PANEL ═══ -->
+  <div class="panel active" id="panelScan">
+    <div class="session-banner inactive" id="sessionBanner">
+      <h3 id="bannerTitle">No active session</h3>
+      <p id="bannerMeta">Go to Setup tab to create a session first</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-val c-green" id="statPresent">0</div>
+        <div class="stat-lbl">Present</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val c-red" id="statAbsent">125</div>
+        <div class="stat-lbl">Absent</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statScanned">0</div>
+        <div class="stat-lbl">Scanned</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="statTotal">125</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+    </div>
+
+    <div class="camera-wrap" id="cameraWrap">
+      <video id="video" autoplay playsinline webkit-playsinline muted></video>
+      <div class="camera-live" id="cameraLive">● LIVE</div>
+      <div class="camera-overlay">
+        <div class="scan-frame" id="scanFrame" style="display:none"></div>
+      </div>
+      <div class="camera-placeholder" id="cameraPlaceholder">Tap "Scan Live QR" to open camera</div>
+    </div>
+
+    <input type="file" id="photoInput" accept="image/*" capture="environment" class="hidden">
+
+    <!-- Two scan buttons side by side -->
+    <div class="scan-btn-row">
+      <button class="btn btn-live" id="liveScanBtn" onclick="toggleLiveScan()">📹 Scan Live QR</button>
+      <button class="btn btn-photo" id="photoScanBtn" onclick="openPhotoCapture()">📸 Scan QR Code</button>
+    </div>
+
+    <button class="btn btn-secondary hidden" id="exportSessionBtn" onclick="exportActiveSession()">⬇ Export This Session (Excel)</button>
+    <div class="flash flash-idle" id="flashMsg">Waiting for session…</div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="card-title">Recent Scans <span id="scanListCount"></span></div>
+      <div class="scan-list" id="scanList"></div>
+    </div>
+  </div>
+
+  <!-- ═══ SESSIONS PANEL ═══ -->
+  <div class="panel" id="panelSessions">
+    <div class="card">
+      <div class="card-title">All Sessions</div>
+      <div id="allSessionsList"></div>
+    </div>
+    <button class="btn btn-secondary" onclick="exportAllSessionsXLSX()">⬇ Export All Sessions (Excel)</button>
+  </div>
+
+  <!-- ═══ MASTER PANEL ═══ -->
+  <div class="panel" id="panelMaster">
+    <div class="card">
+      <div class="card-title">Attendance Matrix</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+        P = Present (scanned before cutoff) · A = Absent (not scanned or after cutoff) · — = session not held yet
+      </p>
+      <div class="master-table-wrap" id="masterTableWrap"></div>
+    </div>
+    <button class="btn btn-primary" onclick="exportMasterXLSX()">⬇ Export Master Sheet (Excel)</button>
+  </div>
+
+  <!-- ═══ BOTTOM TABS ═══ -->
+  <nav class="tabs">
+    <button class="tab" data-panel="panelSetup" onclick="switchTab('panelSetup')">
+      <span class="tab-icon">⚙️</span>Setup
+    </button>
+    <button class="tab active" data-panel="panelScan" onclick="switchTab('panelScan')">
+      <span class="tab-icon">📷</span>Scan
+    </button>
+    <button class="tab" data-panel="panelSessions" onclick="switchTab('panelSessions')">
+      <span class="tab-icon">📋</span>Sessions
+    </button>
+    <button class="tab" data-panel="panelMaster" onclick="switchTab('panelMaster')">
+      <span class="tab-icon">📊</span>Master
+    </button>
+  </nav>
+
+  <canvas id="canvas"></canvas>
+
+  <!-- Toast popup notification -->
+  <div id="toast">
+    <div class="toast-icon" id="toastIcon">✅</div>
+    <div class="toast-body">
+      <div class="toast-title" id="toastTitle">Marked Present</div>
+      <div class="toast-sub" id="toastSub"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    // ─── DELEGATES (synced from delegates.csv — run build_scanner.py to update) ───
+    const DELEGATES = [
+      ["001", "Nikita Tank"],
+      ["002", "Priyadharshan T"],
+      ["003", "Maheshwari mangesh girade"],
+      ["004", "SHAH MAHAVIR DIPESHKUMAR"],
+      ["005", "Pardhiv Divvela"],
+      ["006", "Prerana Jagdish Thakur"],
+      ["007", "Shah Pushti Kalpeshkumar"],
+      ["008", "Rahul V"],
+      ["009", "Mihir Mavadia"],
+      ["010", "Kritika Kamra"],
+      ["011", "Aradhya Sharma"],
+      ["012", "Jacklin Yohan Dabhi"],
+      ["013", "Vipul Sunil Attarde"],
+      ["014", "Abhishek Kumar"],
+      ["015", "Aniket Ravindra Shinde"],
+      ["016", "Y.Sai Shisir"],
+      ["017", "Vaishnavi dixit"],
+      ["018", "Aishwarya Dadhich"],
+      ["019", "Rishika bishnoi"],
+      ["020", "Ritaja Mishra"],
+      ["021", "Samridhi Gupta"],
+      ["022", "Vatsala Singh"],
+      ["023", "shiyaath Baraj"],
+      ["024", "Deepak"],
+      ["025", "Sai Sraval"],
+      ["026", "Suhas LS"],
+      ["027", "prajit keshav portet"],
+      ["028", "Abhi Singh"],
+      ["029", "Adrita Mukherjee"],
+      ["030", "Susmita Sinha"],
+      ["031", "Rugved Rajendra Babhulkar"],
+      ["032", "Krisha Vihar Anand"],
+      ["033", "Vanita Pandya"],
+      ["034", "Kedarnath Chindam"],
+      ["035", "Padma Sowndarya V"],
+      ["036", "Hardik Tatiwala"],
+      ["037", "Chelsy Pareek"],
+      ["038", "RAJAMURI SAI RITHIK REDDY"],
+      ["039", "Gangala Dhanurkesh Yadav"],
+      ["040", "Siddhi Srivastava"],
+      ["041", "Arkadyute Nath"],
+      ["042", "Krupa Hrushikesh Shrotriya"],
+      ["043", "Nikitha Mallam"],
+      ["044", "Nilanjana Bhattacharjee"],
+      ["045", "Neha Chakravarthy"],
+      ["046", "Krishn Kumar Gupta"],
+      ["047", "BEESAM VIGNESH"],
+      ["048", "Sushant Prakash Kurane"],
+      ["049", "Md shakeel Pasha"],
+      ["050", "Utkarsh Singh"],
+      ["051", "Abdullah H"],
+      ["052", "Sachin Annigeri"],
+      ["053", "S Rajesh"],
+      ["054", "ARATHI V.T."],
+      ["055", "ARPIT AWASTHI"],
+      ["056", "TANK BHARATKUMAR NARAYANLAL"],
+      ["057", "Aditi Bhatt"],
+      ["058", "Soumya Agrawal"],
+      ["059", "Rohit Manchanda"],
+      ["060", "Nidhi Agarwal"],
+      ["061", "Rushikesh Akula"],
+      ["062", "Awani Gupta"],
+      ["063", "Himanshu Patidar"],
+      ["064", "Abhinav"],
+      ["065", "Bandaru Hima Mani Satya Kumar"],
+      ["066", "Vishal Ahlawat"],
+      ["067", "MANASA THUDURI"],
+      ["068", "Vaidehi Sahu"],
+      ["069", "Rudri Vinod Dave"],
+      ["070", "Ayush Bhujade"],
+      ["071", "Harshit Srivastava"],
+      ["072", "Sonali Prajapati"],
+      ["073", "Gaurav Thakur"],
+      ["074", "S. Sharmila"],
+      ["075", "A.VARSHINI"],
+      ["076", "V.kavya"],
+      ["077", "Srimathi.R"],
+      ["078", "Siva SriMathi"],
+      ["079", "Bargavi prarthanaa"],
+      ["080", "MANISHA M"],
+      ["081", "Shivani"],
+      ["082", "Priyansh Sharma"],
+      ["083", "RAJAT MADDHESHIYA"],
+      ["084", "Ruju Apurva Shah"],
+      ["085", "Parth Gunwantrao Kadam"],
+      ["086", "Chetan Soni"],
+      ["087", "Shreeja Santosh Rayane"],
+      ["088", "Bhakti Shivaji Mane"],
+      ["089", "Chetananand Yashpal Patil"],
+      ["090", "Swastika Kumari"],
+      ["091", "Shivam Kant"],
+      ["092", "Ribhav Rabha"],
+      ["093", "Jayant Agrawal"],
+      ["094", "Himani Pandey"],
+      ["095", "Mihir Kumar"],
+      ["096", "Arham Nagori"],
+      ["097", "KARTHIK H P"],
+      ["098", "Tharanish M"],
+      ["099", "Shah Hiranshi Sandipkumar"],
+      ["100", "Simi Baruah"],
+      ["101", "Shwetha.S"],
+      ["102", "Mahi Singh"],
+      ["103", "Dr. Poornima R Vijaya"],
+      ["104", "Swastika Jaiswal"],
+      ["105", "MOHIT RAWAL"],
+      ["106", "Moytri Baul Ador"],
+      ["107", "Prashant Gautam"],
+      ["108", "Sreesaipavan.T"],
+      ["109", "Aayush Rehal"],
+      ["110", "mainula tewari"],
+      ["111", "Ajay Choudhary"],
+      ["112", "b poojitha"],
+      ["113", "Abhinav Choudhary"],
+      ["114", "Bijay Dhukuchhu"],
+      ["115", "Siddharth Goswami"],
+      ["116", "LAVUDYA NITHIN KUMAR"],
+      ["117", "Sakshi Goyal"],
+      ["118", "Satish Kumar"],
+      ["119", "Sk Sahin Uddin"],
+      ["120", "Shivani Singh"],
+      ["121", "Daman"],
+      ["122", "Bhavna Singh"],
+      ["123", "Anuradha Jat"],
+      ["124", "Surbhi Siwach"],
+      ["125", "ARADHANA PANDEY"]
+    ];
+
+    const EVENT_START = new Date("2026-06-13");
+    const TOTAL_DAYS = 15;
+    const SESSIONS_DAY = 4;
+    const STORE_KEY = "pbc2026_sessions_v2";
+    const ACTIVE_KEY = "pbc2026_active_session_v2";
+    const TOTAL_DELEGATES = DELEGATES.length;
+
+    // Build lookup maps
+    const ID_TO_NAME = Object.fromEntries(DELEGATES);
+    const NAME_TO_ID = {};
+    const VALID_IDS = new Set(DELEGATES.map(d => d[0]));
+
+    function normName(s) {
+      return s.toLowerCase().replace(/\s+/g, " ").trim();
+    }
+
+    DELEGATES.forEach(([id, name]) => {
+      NAME_TO_ID[normName(name)] = id;
+      NAME_TO_ID[name.toUpperCase()] = id;
+      NAME_TO_ID[name] = id;
+    });
+
+    // ─── Storage ─────────────────────────────────────────────────────────────────
+    function loadSessions() {
+      try { return JSON.parse(localStorage.getItem(STORE_KEY)) || []; }
+      catch { return []; }
+    }
+    function saveSessions(sessions) {
+      localStorage.setItem(STORE_KEY, JSON.stringify(sessions));
+    }
+    function getActiveId() {
+      return localStorage.getItem(ACTIVE_KEY) || null;
+    }
+    function setActiveId(id) {
+      if (id) localStorage.setItem(ACTIVE_KEY, id);
+      else localStorage.removeItem(ACTIVE_KEY);
+    }
+    function getActiveSession() {
+      const id = getActiveId();
+      if (!id) return null;
+      return loadSessions().find(s => s.id === id) || null;
+    }
+    function updateSession(updated) {
+      const sessions = loadSessions();
+      const idx = sessions.findIndex(s => s.id === updated.id);
+      if (idx >= 0) sessions[idx] = updated;
+      else sessions.unshift(updated);
+      saveSessions(sessions);
+      return updated;
+    }
+
+    function dayDate(day) {
+      const d = new Date(EVENT_START);
+      d.setDate(d.getDate() + day - 1);
+      return d;
+    }
+    function fmtDate(d) {
+      return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    }
+    function fmtTime(iso) {
+      return new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
+    function sessionLabel(s) {
+      return `Day ${s.day} · S${s.sessionNum} · ${s.title || "Session"}`;
+    }
+
+    // ─── QR Parsing ──────────────────────────────────────────────────────────────
+    function parseQR(raw) {
+      const trimmed = raw.trim();
+
+      // Format: PBC2026|001|Name
+      const parts = trimmed.split("|");
+      if (parts.length >= 3 && parts[0].startsWith("PBC")) {
+        const id = parts[1].trim().padStart(3, "0");
+        const name = parts.slice(2).join("|").trim();
+        if (VALID_IDS.has(id)) return { ok: true, id, name: ID_TO_NAME[id] || name };
+        return { ok: false, reason: "Unknown delegate ID in QR" };
+      }
+
+      // Format: plain name (current printed cards)
+      const byName = NAME_TO_ID[trimmed] || NAME_TO_ID[normName(trimmed)] || NAME_TO_ID[trimmed.toUpperCase()];
+      if (byName) return { ok: true, id: byName, name: ID_TO_NAME[byName] };
+
+      // Format: just ID like "042"
+      const idOnly = trimmed.padStart(3, "0");
+      if (/^\d{3}$/.test(idOnly) && VALID_IDS.has(idOnly)) {
+        return { ok: true, id: idOnly, name: ID_TO_NAME[idOnly] };
+      }
+
+      return { ok: false, reason: "Not a recognised PBC delegate QR" };
+    }
+
+    // ─── Attendance Logic ────────────────────────────────────────────────────────
+    function cutoffTimestamp(session) {
+      const [hh, mm] = session.cutoff.split(":");
+      const d = dayDate(session.day);
+      d.setHours(parseInt(hh, 10), parseInt(mm, 10), 0, 0);
+      return d.getTime();
+    }
+
+    function scanStatus(session, scanTs) {
+      return scanTs <= cutoffTimestamp(session) ? "present" : "absent";
+    }
+
+    function recordScan(session, id, name) {
+      if (session.scans[id]) {
+        return { duplicate: true, name: session.scans[id].name };
+      }
+      const ts = new Date().toISOString();
+      const status = scanStatus(session, Date.now());
+      session.scans[id] = { name, ts, status };
+      updateSession(session);
+      return { duplicate: false, name, status, ts };
+    }
+
+    // ─── Session Creation ────────────────────────────────────────────────────────
+    function createSession() {
+      const day = parseInt(document.getElementById("setupDay").value, 10);
+      const sessionNum = parseInt(document.getElementById("setupSessionNum").value, 10);
+      const title = document.getElementById("setupTitle").value.trim();
+      const speaker = document.getElementById("setupSpeaker").value.trim();
+      const cutoff = document.getElementById("setupCutoff").value;
+
+      if (!title) { alert("Please enter a session title."); return; }
+      if (!cutoff) { alert("Please set a cutoff time."); return; }
+
+      const existing = loadSessions().find(s => s.day === day && s.sessionNum === sessionNum);
+      if (existing && !confirm(`Day ${day} Session ${sessionNum} already exists (${existing.title}). Replace it?`)) return;
+
+      const session = {
+        id: `d${String(day).padStart(2, "0")}s${sessionNum}_${Date.now()}`,
+        day, sessionNum, title, speaker, cutoff,
+        date: fmtDate(dayDate(day)),
+        createdAt: new Date().toISOString(),
+        scans: existing ? {} : {}
+      };
+
+      if (existing) {
+        const sessions = loadSessions().filter(s => s.id !== existing.id);
+        saveSessions(sessions);
+      }
+
+      updateSession(session);
+      setActiveId(session.id);
+      renderAll();
+      switchTab("panelScan");
+      setFlash("idle", usePhotoMode ? "Session ready — tap 📸 Scan QR Code" : "Session ready — tap Start Scanning");
+    }
+
+    function resumeSession(id) {
+      setActiveId(id);
+      renderAll();
+      switchTab("panelScan");
+    }
+
+    // ─── Day Selector Setup ──────────────────────────────────────────────────────
+    const setupDay = document.getElementById("setupDay");
+    for (let d = 1; d <= TOTAL_DAYS; d++) {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.text = `Day ${d} (${fmtDate(dayDate(d))})`;
+      setupDay.appendChild(opt);
+    }
+    const todayDiff = Math.floor((new Date() - EVENT_START) / 86400000) + 1;
+    if (todayDiff >= 1 && todayDiff <= TOTAL_DAYS) setupDay.value = todayDiff;
+
+    // ─── Mobile / Camera Environment ─────────────────────────────────────────────
+    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const IS_CONTENT_URI = location.href.startsWith("content://") ||
+      location.protocol === "content:" ||
+      /whatsapp\.provider/i.test(location.href) ||
+      /com\.whatsapp/i.test(location.href);
+    const IS_FILE_URI = location.protocol === "file:";
+    const IS_SECURE = window.isSecureContext ||
+      location.protocol === "https:" ||
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    // Always attempt live camera first; will fallback if it fails
+    let usePhotoMode = false;
+    const IN_WHATSAPP = /WhatsApp/i.test(navigator.userAgent);
+
+    function setupScanMode() {
+      // No-op: buttons are always shown; live button state is managed by toggleLiveScan
+    }
+
+    function showMobileWarnings() {
+      const el = document.getElementById("mobileWarn");
+      el.classList.add("hidden");
+    }
+    setupScanMode();
+    showMobileWarnings();
+
+    // ─── Camera & Fast Scanning ──────────────────────────────────────────────────
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    let stream = null;
+    let scanning = false;
+    let rafHandle = null;
+    let lastRaw = "";
+    let lastScanAt = 0;
+    const COOLDOWN = 600;
+    const SCAN_INTERVAL = IS_IOS ? 200 : 120;
+    let lastJsqrTime = 0;
+    let barcodeDetector = null;
+    let useNativeDetector = false;
+
+    // BarcodeDetector is Android-Chrome only; always keep jsQR as primary/fallback
+    if ("BarcodeDetector" in window && !IS_IOS) {
+      try {
+        barcodeDetector = new BarcodeDetector({ formats: ["qr_code"] });
+        useNativeDetector = true;
+      } catch (_) { }
+    }
+
+    async function getCameraStream() {
+      const attempts = [
+        { video: { facingMode: { ideal: "environment" } }, audio: false },
+        { video: { facingMode: "environment" }, audio: false },
+        { video: { facingMode: "user" }, audio: false },
+        { video: { width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+        { video: true, audio: false }
+      ];
+      let lastErr = null;
+      for (const constraints of attempts) {
+        try {
+          return await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (e) { lastErr = e; }
+      }
+      throw lastErr || new Error("Could not access camera");
+    }
+
+    function waitForVideoReady(vid, timeoutMs = 5000) {
+      return new Promise(resolve => {
+        const check = () => vid.videoWidth > 0 && vid.videoHeight > 0;
+        if (check()) return resolve(true);
+
+        const done = () => { if (check()) { cleanup(); resolve(true); } };
+        const cleanup = () => {
+          vid.removeEventListener("loadedmetadata", done);
+          vid.removeEventListener("playing", done);
+          vid.removeEventListener("canplay", done);
+          clearTimeout(timer);
+        };
+        vid.addEventListener("loadedmetadata", done);
+        vid.addEventListener("playing", done);
+        vid.addEventListener("canplay", done);
+        const timer = setTimeout(() => { cleanup(); resolve(check()); }, timeoutMs);
+      });
+    }
+
+    // Audio feedback
+    let audioCtx = null;
+    function beep(freq, dur) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        gain.gain.value = 0.15;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (_) { }
+    }
+    function vibrate(ms) {
+      if (navigator.vibrate) navigator.vibrate(ms);
+    }
+
+    function startScanning() {
+      // Legacy shim — not called from new UI
+      toggleLiveScan();
+    }
+
+    function toggleLiveScan() {
+      const session = getActiveSession();
+      if (!session) {
+        setFlash("error", "Create a session first (Setup tab)");
+        return;
+      }
+      toggleCamera();
+    }
+
+    function openPhotoCapture() {
+      const input = document.getElementById("photoInput");
+      input.value = "";
+      input.click();
+    }
+
+    function decodeQRFromImageData(imageData, w, h) {
+      const attempts = ["attemptBoth", "dontInvert", "onlyInvert"];
+      for (const inv of attempts) {
+        const code = jsQR(imageData.data, w, h, { inversionAttempts: inv });
+        if (code) return code.data;
+      }
+      return null;
+    }
+
+    function decodeQRFromCanvas(sourceCanvas) {
+      const sw = sourceCanvas.width;
+      const sh = sourceCanvas.height;
+      const sizes = [1, 0.75, 0.5, 1.5].map(s => Math.min(Math.floor(Math.max(sw, sh) * s), 1200));
+
+      for (const maxDim of sizes) {
+        const scale = Math.min(1, maxDim / Math.max(sw, sh));
+        const w = Math.max(1, Math.floor(sw * scale));
+        const h = Math.max(1, Math.floor(sh * scale));
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(sourceCanvas, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const result = decodeQRFromImageData(imageData, w, h);
+        if (result) return result;
+      }
+      return null;
+    }
+
+    function decodeQRFromFile(file) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const offscreen = document.createElement("canvas");
+          offscreen.width = img.naturalWidth || img.width;
+          offscreen.height = img.naturalHeight || img.height;
+          offscreen.getContext("2d").drawImage(img, 0, 0);
+          const result = decodeQRFromCanvas(offscreen);
+          URL.revokeObjectURL(url);
+          resolve(result);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+      });
+    }
+
+    document.getElementById("photoInput").addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const session = getActiveSession();
+      if (!session) {
+        setFlash("error", "Create a session first (Setup tab)");
+        return;
+      }
+
+      setFlash("idle", "Reading QR from photo…");
+      const raw = await decodeQRFromFile(file);
+
+      if (!raw) {
+        setFlash("error", "No QR found — move closer, keep steady, try again");
+        showToast("error", "❌", "No QR Found", "Move closer or improve lighting");
+        beep(200, 0.15);
+        return;
+      }
+
+      onCodeDetected(raw);
+
+      setTimeout(() => {
+        const s = getActiveSession();
+        if (s) setFlash("idle", "Tap 📸 Scan QR Code for next delegate");
+      }, 2000);
+    });
+
+    async function toggleCamera() {
+      if (scanning) { stopCamera(); return; }
+
+      setFlash("idle", "Starting camera…");
+      try {
+        stream = await getCameraStream();
+
+        video.setAttribute("playsinline", "true");
+        video.setAttribute("webkit-playsinline", "true");
+        video.muted = true;
+        video.playsInline = true;
+        video.srcObject = stream;
+
+        const playPromise = video.play();
+        if (playPromise) await playPromise.catch(() => { });
+
+        const ready = await waitForVideoReady(video);
+        if (!ready) {
+          throw new Error("Camera started but video feed not ready — try again");
+        }
+
+        scanning = true;
+        document.getElementById("cameraPlaceholder").style.display = "none";
+        document.getElementById("scanFrame").style.display = "block";
+        document.getElementById("cameraLive").style.display = "block";
+        const liveBtn = document.getElementById("liveScanBtn");
+        liveBtn.textContent = "⏹ Stop Live";
+        liveBtn.classList.add("active");
+        setFlash("idle", "Point at QR code — hold steady, 15–30 cm away");
+        rafHandle = requestAnimationFrame(tick);
+      } catch (err) {
+        console.error("Camera error:", err);
+        stopCamera();
+        const name = err?.name || "";
+        switchToPhotoMode();
+        if (IS_CONTENT_URI || IS_FILE_URI || !IS_SECURE) {
+          setFlash("error", "Live camera blocked here — tap 📸 Scan QR Code below");
+        } else if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+          setFlash("error", "Live camera blocked — tap 📸 Scan QR Code below");
+        } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+          setFlash("error", "No camera found — tap 📸 Scan QR Code below");
+        } else if (name === "NotReadableError" || name === "TrackStartError") {
+          setFlash("error", "Camera in use by another app — close it and retry");
+        } else {
+          setFlash("error", "Camera failed — tap 📸 Scan QR Code below");
+        }
+      }
+    }
+
+    function switchToPhotoMode() {
+      usePhotoMode = true;
+      setupScanMode();
+      showMobileWarnings();
+    }
+
+    function stopCamera() {
+      scanning = false;
+      cancelAnimationFrame(rafHandle);
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      video.srcObject = null;
+      document.getElementById("cameraPlaceholder").style.display = "flex";
+      document.getElementById("scanFrame").style.display = "none";
+      document.getElementById("cameraLive").style.display = "none";
+      const liveBtn = document.getElementById("liveScanBtn");
+      liveBtn.textContent = "📹 Scan Live QR";
+      liveBtn.classList.remove("active");
+    }
+
+    let nativeScanBusy = false;
+    async function tryNativeDetect() {
+      if (!useNativeDetector || nativeScanBusy || !scanning) return;
+      if (video.videoWidth < 1) return;
+      nativeScanBusy = true;
+      try {
+        const codes = await barcodeDetector.detect(video);
+        if (codes.length > 0) onCodeDetected(codes[0].rawValue);
+      } catch (_) { useNativeDetector = false; }
+      nativeScanBusy = false;
+    }
+
+    function scanWithJsQR() {
+      if (!scanning || video.readyState < video.HAVE_ENOUGH_DATA) return;
+
+      const now = Date.now();
+      if (now - lastJsqrTime < SCAN_INTERVAL) return;
+      lastJsqrTime = now;
+
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) return;
+
+      const MAX = IS_IOS ? 480 : 640;
+      const scale = Math.min(1, MAX / Math.max(vw, vh));
+      const cw = Math.max(1, Math.floor(vw * scale));
+      const ch = Math.max(1, Math.floor(vh * scale));
+
+      canvas.width = cw;
+      canvas.height = ch;
+      ctx.drawImage(video, 0, 0, cw, ch);
+
+      const imageData = ctx.getImageData(0, 0, cw, ch);
+      const code = jsQR(imageData.data, cw, ch, { inversionAttempts: "attemptBoth" });
+      if (code) onCodeDetected(code.data);
+    }
+
+    function tick() {
+      if (!scanning) return;
+      if (useNativeDetector) tryNativeDetect();
+      scanWithJsQR();
+      rafHandle = requestAnimationFrame(tick);
+    }
+
+    function onCodeDetected(raw) {
+      const now = Date.now();
+      if (raw === lastRaw && now - lastScanAt < COOLDOWN) return;
+      lastRaw = raw;
+      lastScanAt = now;
+      handleScan(raw);
+    }
+
+    function handleScan(raw) {
+      const session = getActiveSession();
+      if (!session) return;
+
+      const parsed = parseQR(raw);
+      if (!parsed.ok) {
+        setFlash("error", `⚠ ${parsed.reason}`);
+        showToast("error", "❌", "Unknown QR", parsed.reason);
+        beep(200, 0.15);
+        return;
+      }
+
+      const result = recordScan(session, parsed.id, parsed.name);
+
+      if (result.duplicate) {
+        setFlash("dup", `Already scanned: ${result.name}`);
+        showToast("dup", "⚠️", "Already Scanned", result.name);
+        beep(350, 0.1);
+        vibrate(30);
+        return;
+      }
+
+      const statusLabel = result.status === "present" ? "Marked Present ✅" : "Marked Absent (late) ⚠️";
+      setFlash(result.status === "present" ? "ok" : "dup",
+        `✓ ${result.name} — ${result.status === "present" ? "Present" : "Absent (late)"} @ ${fmtTime(result.ts)}`);
+      showToast(
+        result.status === "present" ? "ok" : "dup",
+        result.status === "present" ? "✅" : "⚠️",
+        result.name + " — " + statusLabel,
+        `Scanned at ${fmtTime(result.ts)}`
+      );
+      beep(result.status === "present" ? 880 : 440, 0.12);
+      vibrate(50);
+      renderScanPanel();
+    }
+
+    // ─── Toast notification ───────────────────────────────────────────────────
+    let toastTimer = null;
+    function showToast(type, icon, title, sub) {
+      const el = document.getElementById("toast");
+      el.className = type === "dup" ? "toast-dup" : type === "error" ? "toast-error" : "";
+      document.getElementById("toastIcon").textContent = icon;
+      document.getElementById("toastTitle").textContent = title;
+      document.getElementById("toastSub").textContent = sub || "";
+      // Force reflow so transition fires even if already shown
+      el.classList.remove("show");
+      void el.offsetWidth;
+      el.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    // ─── UI ──────────────────────────────────────────────────────────────────────
+    let flashTimer = null;
+    function setFlash(type, msg) {
+      const el = document.getElementById("flashMsg");
+      el.textContent = msg;
+      el.className = `flash flash-${type}`;
+      if (flashTimer) clearTimeout(flashTimer);
+      if (type !== "idle") {
+        flashTimer = setTimeout(() => {
+          const session = getActiveSession();
+          el.textContent = session ? "Ready to scan…" : "Waiting for session…";
+          el.className = "flash flash-idle";
+        }, 1800);
+      }
+    }
+
+    function switchTab(panelId) {
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.getElementById(panelId).classList.add("active");
+      document.querySelector(`.tab[data-panel="${panelId}"]`).classList.add("active");
+      if (panelId === "panelMaster") renderMasterTable();
+      if (panelId === "panelSessions") renderSessionsList();
+    }
+
+    function renderScanPanel() {
+      const session = getActiveSession();
+      const banner = document.getElementById("sessionBanner");
+
+      const exportBtn = document.getElementById("exportSessionBtn");
+
+      if (!session) {
+        banner.className = "session-banner inactive";
+        document.getElementById("bannerTitle").textContent = "No active session";
+        document.getElementById("bannerMeta").textContent = "Go to Setup tab to create a session";
+        document.getElementById("statPresent").textContent = "0";
+        document.getElementById("statAbsent").textContent = TOTAL_DELEGATES;
+        document.getElementById("statScanned").textContent = "0";
+        document.getElementById("scanList").innerHTML = `<div class="empty">No session active</div>`;
+        document.getElementById("scanListCount").textContent = "";
+        exportBtn.classList.add("hidden");
+        return;
+      }
+
+      exportBtn.classList.remove("hidden");
+
+      banner.className = "session-banner";
+      document.getElementById("bannerTitle").textContent = session.title;
+      document.getElementById("bannerMeta").textContent =
+        `Day ${session.day} · Session ${session.sessionNum} · ${session.speaker || "—"} · Cutoff ${session.cutoff}`;
+
+      const scans = Object.values(session.scans);
+      const present = scans.filter(s => s.status === "present").length;
+      const scanned = scans.length;
+      const absent = TOTAL_DELEGATES - present;
+
+      document.getElementById("statPresent").textContent = present;
+      document.getElementById("statAbsent").textContent = absent;
+      document.getElementById("statScanned").textContent = scanned;
+      document.getElementById("scanListCount").textContent = `(${scanned})`;
+
+      const entries = Object.entries(session.scans)
+        .sort((a, b) => new Date(b[1].ts) - new Date(a[1].ts));
+
+      if (!entries.length) {
+        document.getElementById("scanList").innerHTML = `<div class="empty">No scans yet — start scanning!</div>`;
+        return;
+      }
+
+      document.getElementById("scanList").innerHTML = entries.map(([id, s]) => `
+    <div class="scan-item">
+      <div class="scan-dot ${s.status}"></div>
+      <div class="scan-info">
+        <div class="scan-name">${s.name}</div>
+        <div class="scan-meta">${id} · ${fmtTime(s.ts)} · ${s.status === "present" ? "Present" : "Absent (late)"}</div>
+      </div>
+    </div>`).join("");
+    }
+
+    function renderRecentSessions() {
+      const sessions = loadSessions().slice(0, 5);
+      const el = document.getElementById("recentSessions");
+      if (!sessions.length) {
+        el.innerHTML = `<div class="empty">No sessions yet</div>`;
+        return;
+      }
+      el.innerHTML = sessions.map(s => {
+        const count = Object.keys(s.scans).length;
+        return `<div class="session-item" onclick="resumeSession('${s.id}')">
+      <h4>${s.title}</h4>
+      <p>Day ${s.day} · S${s.sessionNum} · ${count}/${TOTAL_DELEGATES} scanned · Cutoff ${s.cutoff}</p>
+    </div>`;
+      }).join("");
+    }
+
+    function renderSessionsList() {
+      const sessions = loadSessions();
+      const activeId = getActiveId();
+      const el = document.getElementById("allSessionsList");
+
+      if (!sessions.length) {
+        el.innerHTML = `<div class="empty">No sessions recorded yet</div>`;
+        return;
+      }
+
+      el.innerHTML = sessions.map(s => {
+        const count = Object.keys(s.scans).length;
+        const present = Object.values(s.scans).filter(x => x.status === "present").length;
+        const isActive = s.id === activeId;
+        return `<div class="session-item${isActive ? " active-session" : ""}" onclick="resumeSession('${s.id}')">
+      <h4><span class="session-badge">D${s.day} S${s.sessionNum}</span>${s.title}</h4>
+      <p>${s.date} · ${s.speaker || "—"} · Cutoff ${s.cutoff} · ${present} present / ${count} scanned</p>
+      <div style="margin-top:8px">
+        <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();exportSessionXLSX('${s.id}')">⬇ Excel</button>
+        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation();deleteSession('${s.id}')">Delete</button>
+      </div>
+    </div>`;
+      }).join("");
+    }
+
+    function deleteSession(id) {
+      if (!confirm("Delete this session and all its scans? Cannot be undone.")) return;
+      const sessions = loadSessions().filter(s => s.id !== id);
+      saveSessions(sessions);
+      if (getActiveId() === id) setActiveId(sessions[0]?.id || null);
+      renderAll();
+    }
+
+    // ─── Master Attendance Table ─────────────────────────────────────────────────
+    function getAttendanceMatrix() {
+      const sessions = loadSessions().sort((a, b) =>
+        a.day !== b.day ? a.day - b.day : a.sessionNum - b.sessionNum);
+
+      const matrix = DELEGATES.map(([id, name]) => {
+        const row = { id, name, cells: {}, present: 0, absent: 0, scanned: 0 };
+        sessions.forEach(s => {
+          const key = `D${s.day}S${s.sessionNum}`;
+          const scan = s.scans[id];
+          if (scan) {
+            row.cells[key] = scan.status === "present" ? "P" : "A";
+            row.scanned++;
+            if (scan.status === "present") row.present++;
+            else row.absent++;
+          } else {
+            row.cells[key] = "A";
+            row.absent++;
+          }
+        });
+        return row;
+      });
+      return { sessions, matrix };
+    }
+
+    function renderMasterTable() {
+      const { sessions, matrix } = getAttendanceMatrix();
+      const wrap = document.getElementById("masterTableWrap");
+
+      if (!sessions.length) {
+        wrap.innerHTML = `<div class="empty">Record some sessions to see the master sheet</div>`;
+        return;
+      }
+
+      const cols = sessions.map(s => `D${s.day}S${s.sessionNum}`);
+      let html = `<table><thead><tr><th>ID</th><th>Name</th>`;
+      cols.forEach(c => { html += `<th>${c}</th>`; });
+      html += `<th>Present</th><th>Total Sess.</th></tr></thead><tbody>`;
+
+      matrix.forEach(row => {
+        html += `<tr><td>${row.id}</td><td class="name-col">${row.name}</td>`;
+        cols.forEach(c => {
+          const v = row.cells[c];
+          if (!v) html += `<td class="cell-dash">—</td>`;
+          else html += `<td class="${v === "P" ? "cell-p" : "cell-a"}">${v}</td>`;
+        });
+        html += `<td class="cell-p">${row.present}</td><td>${sessions.length}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+      wrap.innerHTML = html;
+    }
+
+    // ─── Excel Export ────────────────────────────────────────────────────────────
+    function downloadXLSX(wb, filename) {
+      XLSX.writeFile(wb, filename);
+    }
+
+    function buildSessionSheet(session) {
+      const rows = [["PBC 2026 Attendance — Session Report"], []];
+      rows.push(["Day", session.day]);
+      rows.push(["Date", session.date]);
+      rows.push(["Session #", session.sessionNum]);
+      rows.push(["Title", session.title]);
+      rows.push(["Speaker", session.speaker || ""]);
+      rows.push(["Cutoff Time", session.cutoff]);
+      rows.push(["Exported", new Date().toLocaleString("en-IN")]);
+      rows.push([]);
+      rows.push(["Delegate ID", "Name", "Status", "Scan Time", "Notes"]);
+
+      let present = 0, absent = 0, notScanned = 0;
+
+      DELEGATES.forEach(([id, name]) => {
+        const scan = session.scans[id];
+        if (scan) {
+          const status = scan.status === "present" ? "Present" : "Absent (scanned after cutoff)";
+          if (scan.status === "present") present++; else absent++;
+          rows.push([id, name, status, new Date(scan.ts).toLocaleString("en-IN"), ""]);
+        } else {
+          notScanned++;
+          rows.push([id, name, "Absent (not scanned)", "", ""]);
+        }
+      });
+
+      rows.push([]);
+      rows.push(["Summary", "", "", "", ""]);
+      rows.push(["Present", present]);
+      rows.push(["Absent (late scan)", absent]);
+      rows.push(["Absent (not scanned)", notScanned]);
+      rows.push(["Total Delegates", TOTAL_DELEGATES]);
+
+      return rows;
+    }
+
+    function exportActiveSession() {
+      const id = getActiveId();
+      if (id) exportSessionXLSX(id);
+    }
+
+    function exportSessionXLSX(sessionId) {
+      const session = loadSessions().find(s => s.id === sessionId);
+      if (!session) return;
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(buildSessionSheet(session));
+      XLSX.utils.book_append_sheet(wb, ws, `D${session.day}S${session.sessionNum}`);
+      downloadXLSX(wb, `PBC2026_D${session.day}_S${session.sessionNum}_${session.title.replace(/[^a-z0-9]/gi, "_")}.xlsx`);
+    }
+
+    function exportAllSessionsXLSX() {
+      const sessions = loadSessions();
+      if (!sessions.length) { alert("No sessions to export."); return; }
+      const wb = XLSX.utils.book_new();
+      sessions.sort((a, b) => a.day !== b.day ? a.day - b.day : a.sessionNum - b.sessionNum)
+        .forEach(s => {
+          const ws = XLSX.utils.aoa_to_sheet(buildSessionSheet(s));
+          const sheetName = `D${s.day}S${s.sessionNum}`.slice(0, 31);
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
+        });
+      downloadXLSX(wb, "PBC2026_All_Sessions_Attendance.xlsx");
+    }
+
+    function exportMasterXLSX() {
+      const { sessions, matrix } = getAttendanceMatrix();
+      if (!sessions.length) { alert("No sessions recorded yet."); return; }
+
+      const cols = sessions.map(s => `D${s.day}S${s.sessionNum}`);
+      const header = ["Delegate ID", "Name", ...cols, "Present Count", "Sessions Held"];
+      const rows = [header];
+
+      matrix.forEach(row => {
+        rows.push([
+          row.id, row.name,
+          ...cols.map(c => row.cells[c] || "—"),
+          row.present, sessions.length
+        ]);
+      });
+
+      // Summary row per session
+      rows.push([]);
+      rows.push(["Session Summary"]);
+      sessions.forEach(s => {
+        const key = `D${s.day}S${s.sessionNum}`;
+        let p = 0;
+        DELEGATES.forEach(([id]) => { if (s.scans[id]?.status === "present") p++; });
+        rows.push([key, s.title, s.speaker, s.cutoff, `Present: ${p}/${TOTAL_DELEGATES}`]);
+      });
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, "Master Attendance");
+      downloadXLSX(wb, "PBC2026_Master_Attendance.xlsx");
+    }
+
+    function renderAll() {
+      renderScanPanel();
+      renderRecentSessions();
+      renderSessionsList();
+    }
+
+    renderAll();
+  </script>
+</body>
+
+</html>
