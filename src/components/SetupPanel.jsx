@@ -42,7 +42,7 @@ export default function SetupPanel({ sessions, createSession, resumeSession }) {
           <div>
             <label>Session #</label>
             <select value={sessionNum} onChange={e => setSessionNum(Number(e.target.value))}>
-              {[1, 2, 3, 4].map(n => (
+              {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
                 <option key={n} value={n}>Session {n}</option>
               ))}
             </select>

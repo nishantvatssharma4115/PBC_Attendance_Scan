@@ -128,7 +128,7 @@ export const DELEGATES = [
 
 export const EVENT_START = new Date("2026-06-13");
 export const TOTAL_DAYS = 15;
-export const SESSIONS_DAY = 4;
+export const SESSIONS_DAY = 10;
 export const TOTAL_DELEGATES = DELEGATES.length;
 
 export const ID_TO_NAME = Object.fromEntries(DELEGATES);

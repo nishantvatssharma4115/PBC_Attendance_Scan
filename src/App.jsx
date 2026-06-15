@@ -19,7 +19,9 @@ function App() {
     createSession,
     deleteSession,
     resumeSession,
-    recordScan
+    recordScan,
+    syncStatus,
+    deviceId
   } = useSessions();
 
   useEffect(() => {
@@ -37,7 +39,7 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header syncStatus={syncStatus} deviceId={deviceId} />
       
       {activeTab === 'setup' && (
         <SetupPanel 
